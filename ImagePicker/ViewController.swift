@@ -7,13 +7,21 @@
 //
 
 import UIKit
+import Photos
 
-class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, PhotoSelectedDelegate {
     
     var alertController : UIAlertController!
     var imagePickerController : UIImagePickerController!
+    
+    var selectedAsset : PHAsset?
                             
+    @IBOutlet weak var imagePickerButton: UIButton!
+    
     @IBOutlet weak var imageView: UIImageView!
+    
+    
+    
     override func viewDidLoad() {
         
         super.viewDidLoad()
@@ -22,9 +30,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         self.imagePickerController = UIImagePickerController()
         self.imagePickerController.delegate = self
         
-        // setup alertController
-        self.setupAlertController()
-        
     }
 
     override func didReceiveMemoryWarning() {
@@ -32,7 +37,13 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     }
 
     func setupAlertController() {
+        
         self.alertController = UIAlertController(title: "imagePicker", message: "Pick a new image!", preferredStyle: UIAlertControllerStyle.ActionSheet )
+        
+        // set popOverPresentationController
+        if self.alertController.popoverPresentationController {
+            self.alertController.popoverPresentationController.sourceView = self.imagePickerButton
+        }
         
         let cameraAction = UIAlertAction(title: "Camera", style: UIAlertActionStyle.Default) { (actionObject) -> Void in
             println("camera action!")
@@ -45,10 +56,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         
         let imageLibraryAction = UIAlertAction(title: "Photo Library", style: UIAlertActionStyle.Default) { (actionObject) -> Void in
             println("library action!")
-            self.imagePickerController.sourceType = UIImagePickerControllerSourceType.PhotoLibrary
-            self.presentViewController(self.imagePickerController, animated: true, completion: {
-                println("image picker block: library")
-            })
+            self.performSegueWithIdentifier("CollectionView", sender: self)
             
         }
         
@@ -60,6 +68,9 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     }
     
     @IBAction func pickImage(sender: UIButton) {
+        // setup alertController
+        self.setupAlertController()
+        
         self.presentViewController(self.alertController, animated: true, completion: {
             println("pickImage button callback")
         })
@@ -76,6 +87,29 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         }
     }
     
+    override func prepareForSegue(segue: UIStoryboardSegue!, sender: AnyObject!) {
+        if segue.identifier == "CollectionView" {
+            if segue.destinationViewController.isKindOfClass(PhotosCollectionController.self) {
+                var collection = segue.destinationViewController as PhotosCollectionController
+                // load with Assets
+                collection.fetchedAssetResult = PHAsset.fetchAssetsWithOptions(nil)
+                collection.delegate = self
+            }
+        }
+    }
+    
+    //Mark: - PhotoSelectedDelegate
+    func photoSelected(asset: PHAsset) {
+        if asset != nil {
+            var imageManager = PHImageManager()
+            imageManager.requestImageForAsset(asset, targetSize: self.imageView.frame.size, contentMode: PHImageContentMode.AspectFill, options: nil) { (result : UIImage!, info : [NSObject : AnyObject]!) -> Void in
+                
+                NSOperationQueue.mainQueue().addOperationWithBlock({ () -> Void in
+                    self.imageView.image = result
+                })
+            }
+        }
+    }
 
 }
 
