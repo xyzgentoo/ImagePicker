@@ -57,7 +57,7 @@ class PhotosCollectionController: UIViewController, UICollectionViewDataSource, 
     
     
     func randomColor() -> UIColor {
-        var rgb = [255,255,255].map{ CGFloat(arc4random_uniform($0)) / CGFloat(255.0)}
+        var rgb = [255,255,255].map{ CGFloat(arc4random_uniform($0)) / CGFloat(255.0) }
         return UIColor(red: rgb.removeLast(), green: rgb.removeLast(), blue: rgb.removeLast(), alpha: 1.0)
     }
     

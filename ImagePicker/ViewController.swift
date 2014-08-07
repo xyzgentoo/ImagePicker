@@ -41,7 +41,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         self.alertController = UIAlertController(title: "imagePicker", message: "Pick a new image!", preferredStyle: UIAlertControllerStyle.ActionSheet )
         
         // set popOverPresentationController
-        if self.alertController.popoverPresentationController {
+        if self.alertController.popoverPresentationController != nil {
             self.alertController.popoverPresentationController.sourceView = self.imagePickerButton
         }
         
@@ -98,7 +98,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         }
     }
     
-    //Mark: - PhotoSelectedDelegate
+    //MARK: - PhotoSelectedDelegate
     func photoSelected(asset: PHAsset) {
         if asset != nil {
             var imageManager = PHImageManager()
